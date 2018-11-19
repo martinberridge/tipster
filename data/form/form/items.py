@@ -8,4 +8,19 @@
 from scrapy.item import Item, Field 
 
 class HorseItem(Item) : 
+    horse_url = Field()
     horse_name = Field()
+    form = Field()
+
+class FormItem(Item) : 
+    meeting_url = Field()
+    place = Field()
+    draw = Field()
+    going = Field()
+    distance = Field()
+    horse_class = Field()
+    url_jockey = Field()
+    stone = Field()
+    pounds = Field()
+    behind_by = Field()
+    commentary = Field()
