@@ -12,7 +12,9 @@ class HorseItem(Item) :
     horse_name = Field()
     form = Field()
 
-class FormItem(Item) : 
+class FormItem(Item) :
+    sp = Field()
+    race_class = Field() 
     meeting_url = Field()
     place = Field()
     draw = Field()
@@ -24,3 +26,6 @@ class FormItem(Item) :
     pounds = Field()
     behind_by = Field()
     commentary = Field()
+    jockey_claim = Field()
+    jockey_url = Field()
+    trainer_url = Field()
