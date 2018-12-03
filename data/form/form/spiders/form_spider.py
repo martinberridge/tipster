@@ -45,23 +45,49 @@ class FormSpider(CrawlSpider):
             item = FormItem()
             
             item['commentary'] = commentaryrow.xpath('td/text()').extract_first()
+            item['meeting_url'], item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'/a/@href').extract()    
             
+            #if horse pulled up place string is '-' 
             place_string = resultsrow.xpath(CELL1_XPATH+'/text()').extract_first()
-            item["place"] =  int(re.sub(r'\D',"",place_string))
-            item["draw"]  = resultsrow.xpath(CELL1_XPATH+'/span/text()').extract_first()  
+            item["place"] = None if place_string.strip() == '-'  else int(re.sub(r'\D',"",place_string))
+            
+            raw_draw = resultsrow.xpath(CELL1_XPATH+'/span/text()').extract_first()  
+            item["draw"] = int(re.sub(r'\D',"",raw_draw)) if raw_draw else None
+
             going_distance_class = resultsrow.xpath(CELL2_XPATH+'/text()').extract()[1:]  
             if len(going_distance_class) == 2: 
                item['going'],  item['distance'] = going_distance_class
             else :
                item['going'],  item['distance'], item['race_class'] = going_distance_class
 
-            item['meeting_url'], item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'/a/@href').extract()    
+            # TODO get date and time of meeting convert to datetime 
             item['jockey_claim'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="jockey-claim"]/text()').extract()     
+            
+            # TODO convert to weight in pounds 
+            stone = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-st"]/text()').extract()   
+            pounds = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-lb"]/text()').extract()             
+            
             item['stone'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-st"]/text()').extract()     
             item['pounds'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-lb"]/text()').extract()             
+            
             item['sp'] = resultsrow.xpath(CELL4_XPATH+'/text()[1]').extract_first()        
-            item['behind_by'] = resultsrow.xpath(CELL4_XPATH+'/text()[2]').extract_first()        
-            form.append(dict(item))
+            
+            #refactor 
+            behind_by_raw = resultsrow.xpath(CELL4_XPATH+'/text()[2]').extract_first()  
+            if behind_by_raw :
+                if behind_by_raw == 'won': 
+                    item['behind_by'] = 0.0
+                elif behind_by_raw == 'Pulled Up':
+                    item['behind_by'] = None
+                else:         
+                    try:
+                        search = re.search(r'\d+\.\d+',behind_by_raw)
+                    except TypeError:
+                        print("behind by raw {0}".format(behind_by_raw))
+                    behind_by_string = re.search(r'\d+\.\d+',behind_by_raw)[0] if search else None
+                    item['behind_by'] = float(behind_by_string) if behind_by_string else None
+            
+            form.append(dict(item)) 
 
         horse_item['form'] = form
 
