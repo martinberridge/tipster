@@ -3,6 +3,8 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor  
 from form.items import HorseItem, FormItem
 
+import re
+
 CELL1_XPATH = 'td[1]'
 CELL2_XPATH = 'td[2]'
 CELL3_XPATH = 'td[3]'
@@ -44,7 +46,8 @@ class FormSpider(CrawlSpider):
             
             item['commentary'] = commentaryrow.xpath('td/text()').extract_first()
             
-            item["place"] = resultsrow.xpath(CELL1_XPATH+'/text()').extract_first()
+            place_string = resultsrow.xpath(CELL1_XPATH+'/text()').extract_first()
+            item["place"] =  int(re.sub(r'\D',"",place_string))
             item["draw"]  = resultsrow.xpath(CELL1_XPATH+'/span/text()').extract_first()  
             going_distance_class = resultsrow.xpath(CELL2_XPATH+'/text()').extract()[1:]  
             if len(going_distance_class) == 2: 
