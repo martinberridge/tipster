@@ -45,13 +45,13 @@ class FormSpider(CrawlSpider):
             item = FormItem()
             
             item['commentary'] = commentaryrow.xpath('td/text()').extract_first()
-            item['meeting_url'], item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'/a/@href').extract()    
+            item['meeting_url'], horse_url, item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'//a/@href').extract()    
             
             #if horse pulled up place string is '-' 
             place_string = resultsrow.xpath(CELL1_XPATH+'/text()').extract_first()
             item["place"] = None if place_string.strip() == '-'  else int(re.sub(r'\D',"",place_string))
             
-            raw_draw = resultsrow.xpath(CELL1_XPATH+'/span/text()').extract_first()  
+            raw_draw = resultsrow.xpath(CELL1_XPATH+'/div/text()').extract_first()  
             item["draw"] = int(re.sub(r'\D',"",raw_draw)) if raw_draw else None
 
             going_distance_class = resultsrow.xpath(CELL2_XPATH+'/text()').extract()[1:]  
@@ -61,14 +61,15 @@ class FormSpider(CrawlSpider):
                item['going'],  item['distance'], item['race_class'] = going_distance_class
 
             # TODO get date and time of meeting convert to datetime 
-            item['jockey_claim'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="jockey-claim"]/text()').extract()     
+            item['jockey_claim'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="jockey-claim"]/text()').extract_first()     
             
             # TODO convert to weight in pounds 
-            stone = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-st"]/text()').extract()   
-            pounds = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-lb"]/text()').extract()             
+            stone = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-st"]/text()').extract_first()   
+            pounds = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-lb"]/text()').extract_first()             
             
-            item['stone'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-st"]/text()').extract()     
-            item['pounds'] = resultsrow.xpath(CELL3_XPATH+'/span[@class="racecard-weight-lb"]/text()').extract()             
+
+            item['stone'] =   int(re.sub(r'\D',"", stone)) if stone else None
+            item['pounds'] =  int(re.sub(r'\D',"", pounds)) if pounds else None          
             
             item['sp'] = resultsrow.xpath(CELL4_XPATH+'/text()[1]').extract_first()        
             
@@ -92,5 +93,3 @@ class FormSpider(CrawlSpider):
         horse_item['form'] = form
 
         return horse_item
-
-
