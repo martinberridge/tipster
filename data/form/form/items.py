@@ -25,6 +25,8 @@ class FormItem(Item) :
     stone = Field()
     pounds = Field()
     behind_by = Field()
+    meeting_date_time = Field()
+    course = Field()
     commentary = Field()
     jockey_claim = Field()
     jockey_url = Field()

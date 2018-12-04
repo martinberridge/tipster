@@ -2,7 +2,7 @@ import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor  
 from form.items import HorseItem, FormItem
-
+import datetime 
 import re
 
 CELL1_XPATH = 'td[1]'
@@ -47,6 +47,11 @@ class FormSpider(CrawlSpider):
             item['commentary'] = commentaryrow.xpath('td/text()').extract_first()
             item['meeting_url'], horse_url, item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'//a/@href').extract()    
             
+            r=re.search(r'([0-9]*)-([a-z]*)-([0-9]*).*\/([a-z]*).*-([0-9]*)',item['meeting_url'])
+            dd, mon, yyyy, course, time = r.groups() 
+            meeting_date_time =  datetime.datetime.strptime("{0} {1} {2} {3}:{4}".format(dd,mon,yyyy, time[:2],time[2:]),"%d %b %Y %H:%M")
+            item['meeting_date_time'] = meeting_date_time
+            item['course'] = course
             #if horse pulled up place string is '-' 
             place_string = resultsrow.xpath(CELL1_XPATH+'/text()').extract_first()
             item["place"] = None if place_string.strip() == '-'  else int(re.sub(r'\D',"",place_string))
