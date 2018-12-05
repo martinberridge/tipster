@@ -1,14 +1,22 @@
 import scrapy 
+import datetime
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor  
 from meetings.items import MeetingItem, RunnerItem
+
+def date_urls(no_of_days):
+   base = datetime.datetime.today()
+   datelist = [base - datetime.timedelta(days=x) for x in range(0, no_of_days)]
+   for d in datelist:
+      yield d.strftime("https://gg.co.uk/racing/%d-%b-%Y").lower()
+
 
 class MeetingsSpider(CrawlSpider):
 
     name = "meetings" 
     allowed_domains = ["gg.co.uk"]
 
-    start_urls = ['https://gg.co.uk/racing/01-may-2018'] 
+    start_urls = date_urls(10)
 
     rules = (
         Rule(
