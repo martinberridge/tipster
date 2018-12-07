@@ -1,3 +1,4 @@
+import re
 import scrapy 
 import datetime
 from scrapy.spiders import CrawlSpider, Rule
@@ -35,7 +36,9 @@ class MeetingsSpider(CrawlSpider):
         runner_item = RunnerItem()
         runner_item['horse_url'] = runner.xpath('td[3]/a[1]/@href').extract_first()
         runner_item['horse_name'] = runner.xpath('td[3]/a[1]/text()').extract_first()
-        runner_item['place'] =  runner.xpath('td[1]/text()[1]').extract_first()
+        place_string = runner.xpath('td[1]/text()[1]').extract_first()
+        runner_item["place"] = None if place_string.strip() == '-'  else int(re.sub(r'\D',"",place_string))
+           
         runner_item['age'],runner_item['last_ran'] = runner.xpath('td[2]/text()').extract()[-2:]  
 
         runners.append(dict(runner_item)) 
