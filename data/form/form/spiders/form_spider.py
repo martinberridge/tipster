@@ -1,4 +1,6 @@
 import scrapy 
+from scrapy.http import Request
+from scrapy.http import Request
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor  
 from form.items import HorseItem, FormItem
@@ -10,12 +12,18 @@ CELL2_XPATH = 'td[2]'
 CELL3_XPATH = 'td[3]'
 CELL4_XPATH = 'td[4]'
 
+def date_urls(no_of_days):
+   base = datetime.datetime.today()
+   datelist = [base - datetime.timedelta(days=x) for x in range(0, no_of_days)]
+   for d in datelist:
+      yield d.strftime("https://gg.co.uk/racing/%d-%b-%Y").lower()
+
 class FormSpider(CrawlSpider):
 
     name = "form" 
     allowed_domains = ["gg.co.uk"]
 
-    start_urls = ['https://gg.co.uk/racing/01-may-2018']
+    start_urls = date_urls(10)
     rules = (
         Rule(
             LinkExtractor(restrict_xpaths=['//*[@id="page"]//td[2]/a']),
@@ -27,6 +35,10 @@ class FormSpider(CrawlSpider):
            callback='parse_horse'
        )
     )
+
+    def start_requests(self):
+        for url in self.start_urls:
+           yield Request(url)
 
     def parse_horse(self, response) :
         horse_item = HorseItem()
@@ -78,7 +90,7 @@ class FormSpider(CrawlSpider):
             
             item['sp'] = resultsrow.xpath(CELL4_XPATH+'/text()[1]').extract_first()        
             
-            #refactor 
+            # refactor 
             behind_by_raw = resultsrow.xpath(CELL4_XPATH+'/text()[2]').extract_first()  
             if behind_by_raw :
                 if behind_by_raw == 'won': 
@@ -87,11 +99,10 @@ class FormSpider(CrawlSpider):
                     item['behind_by'] = None
                 else:         
                     try:
-                        search = re.search(r'\d+\.\d+',behind_by_raw)
+                        search = re.search(r'\d+\.?\d+?',behind_by_raw)
                     except TypeError:
                         print("behind by raw {0}".format(behind_by_raw))
-                    behind_by_string = re.search(r'\d+\.\d+',behind_by_raw)[0] if search else None
-                    item['behind_by'] = float(behind_by_string) if behind_by_string else None
+                    item['behind_by'] = float(search.group()) if search else None
             
             form.append(dict(item)) 
 
