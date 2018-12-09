@@ -29,6 +29,12 @@ class MeetingsSpider(CrawlSpider):
     def parse_meeting(self, response): 
       meeting_item = MeetingItem()
       meeting_item['meeting_url'] = response.request.url
+      
+      r=re.search(r'([0-9]*)-([a-z]*)-([0-9]*).*\/([a-z]*).*-([0-9]*)',meeting_item['meeting_url'])
+
+      dd, mon, yyyy, course, time = r.groups() 
+      meeting_date_time =  datetime.datetime.strptime("{0} {1} {2} {3}:{4}".format(dd,mon,yyyy, time[:2],time[2:]),"%d %b %Y %H:%M")
+      meeting_item['meeting_date_time'] = meeting_date_time
       meeting_item['meeting_name'] = response.xpath('//h2/text()')[1].extract()  
       runners = []
 

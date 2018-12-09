@@ -9,7 +9,8 @@ import scrapy
 
 class MeetingItem(scrapy.Item):
    meeting_url = scrapy.Field() 
-   meeting_name = scrapy.Field()   
+   meeting_name = scrapy.Field() 
+   meeting_date_time = scrapy.Field()  
    runners = scrapy.Field()
 
 class RunnerItem(scrapy.Item):
