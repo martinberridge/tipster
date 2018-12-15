@@ -16,8 +16,10 @@ class MeetingsSpider(CrawlSpider):
 
     name = "meetings" 
     allowed_domains = ["gg.co.uk"]
-
-    start_urls = date_urls(10)
+    
+    def __init__(self, no_of_days=1, *args, **kwargs):
+        super(MeetingsSpider, self).__init__(*args, **kwargs)
+        self.start_urls = date_urls(int(no_of_days))
 
     rules = (
         Rule(

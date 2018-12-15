@@ -22,6 +22,10 @@ class FormSpider(CrawlSpider):
 
     name = "form" 
     allowed_domains = ["gg.co.uk"]
+    
+    def __init__(self, no_of_days=1, *args, **kwargs):
+        super(FormSpider, self).__init__(*args, **kwargs)
+        self.start_urls = date_urls(int(no_of_days))
 
     start_urls = date_urls(10)
     rules = (
