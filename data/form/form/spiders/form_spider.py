@@ -46,8 +46,9 @@ class FormSpider(CrawlSpider):
 
     def parse_horse(self, response) :
         horse_item = HorseItem()
-        horse_item['horse_url'] = response.request.url
-        horse_item['horse_name'] = response.xpath("//h1/text()").extract_first()
+        horse_item['horse_url'] = "https://gg.co.uk/racing" + response.request.url
+        horse_name_country = response.xpath("//h1/text()").extract_first()
+        horse_item['horse_name']  = re.match('(.*)( \([A-Z]*\))', horse_name_country ).group(1).strip()
         form = []
 
         print ( horse_item['horse_url'] )
@@ -61,8 +62,8 @@ class FormSpider(CrawlSpider):
             item = FormItem()
             
             item['commentary'] = commentaryrow.xpath('td/text()').extract_first()
-            item['meeting_url'], horse_url, item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'//a/@href').extract()    
-            
+            meeting_url, horse_url, item['jockey_url'], item['trainer_url'] = resultsrow.xpath(CELL3_XPATH+'//a/@href').extract()    
+            item['meeting_url'] = "https://gg.co.uk" + meeting_url
             r=re.search(r'([0-9]*)-([a-z]*)-([0-9]*).*\/([a-z]*).*-([0-9]*)',item['meeting_url'])
             dd, mon, yyyy, course, time = r.groups() 
             meeting_date_time =  datetime.datetime.strptime("{0} {1} {2} {3}:{4}".format(dd,mon,yyyy, time[:2],time[2:]),"%d %b %Y %H:%M")
